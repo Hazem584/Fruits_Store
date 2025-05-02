@@ -1,0 +1,208 @@
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:f_storee/app_colors.dart';
+import 'package:f_storee/model.dart';
+import 'package:f_storee/product_item.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+class Home extends StatefulWidget {
+  const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  final List<String> items = [
+    "assets/bannars/Slider 1.png",
+    "assets/bannars/Slider 2.png",
+    "assets/bannars/Slider 3.png",
+  ];
+
+  final List<CategoryMode> categories = [
+    CategoryMode(name: "Fruits", image: "assets/category/Fruits.png"),
+    CategoryMode(name: "Milk & Eggs", image: "assets/category/Milks.png"),
+    CategoryMode(name: "Beverages", image: "assets/category/Beverages.png"),
+    CategoryMode(name: "Laundry", image: "assets/category/Laundry.png"),
+    CategoryMode(name: "Vegetables", image: "assets/category/Vegetables.png"),
+  ];
+
+  final List<ProductMode> products = [
+    ProductMode(name: "Banana", image: "assets/fruits/banana.png", price: 3.99, rate: "4.8", reteCount: "287"),
+    ProductMode(name: "Orange", image: "assets/fruits/Orange.png", price: 2.99, rate: "4.8", reteCount: "287"),
+    ProductMode(name: "Pepper", image: "assets/fruits/Pepper.png", price: 3.99, rate: "4.8", reteCount: "287"),
+    ProductMode(name: "Egg", image: "assets/category/Milks.png", price: 3.99, rate: "4.8", reteCount: "287"),
+  ];
+
+  final Set<ProductMode> basketList = {};
+
+  void toggleSelected(ProductMode product) {
+    setState(() {
+      if (basketList.contains(product)) {
+        basketList.remove(product);
+      } else {
+        basketList.add(product);
+      }
+    });
+  }
+
+  bool isSelected(ProductMode product) => basketList.contains(product);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: const SizedBox.shrink(),
+        leadingWidth: 0,
+        title: Row(
+          children: [
+            SvgPicture.asset("assets/Icons/Motocycle.svg"),
+            const SizedBox(width: 10),
+            const Text("61 Hopper street....", style: TextStyle(fontSize: 19)),
+            const SizedBox(width: 5),
+            const Icon(Icons.keyboard_arrow_down_rounded, size: 30),
+            const Spacer(),
+            SvgPicture.asset("assets/Icons/Basket.svg"),
+          ],
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            CarouselSlider.builder(
+              itemCount: items.length,
+              itemBuilder: (context, index, _) => Image.asset(items[index]),
+              options: CarouselOptions(
+                height: 170,
+                autoPlay: true,
+                viewportFraction: 0.6,
+                enlargeCenterPage: true,
+                autoPlayInterval: const Duration(seconds: 4),
+                autoPlayAnimationDuration: const Duration(seconds: 2),
+                autoPlayCurve: Curves.fastOutSlowIn,
+              ),
+            ),
+            const SizedBox(height: 10),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: List.generate(categories.length, (index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 30),
+                          child: Container(
+                            width: 100,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.asset(categories[index].image, width: 70),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        Text(categories[index].name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Fruits", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                  Text("See all", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppColors.primaryColor)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Row(
+                  children: products.map((item) {
+                    return ProductItem(
+                      image: item.image,
+                      name: item.name,
+                      rate: item.rate,
+                      price: item.price.toStringAsFixed(2),
+                      ratecount: item.reteCount,
+                      onTap: () => toggleSelected(item),
+                      icon: isSelected(item) ? const Icon(Icons.remove) : const Icon(Icons.add),
+                    );
+                  }).toList().cast<Widget>(),
+                ),
+              ),
+            ),
+            if (basketList.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
+                child: Container(
+                  width: double.infinity,
+                  height: 77,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor,
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 215,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: basketList.length,
+                          itemBuilder: (context, index) {
+                            final product = basketList.elementAt(index);
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 4.0),
+                              child: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Image.asset(product.image),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        width: 2,
+                        height: 40,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 10),
+                      const Text("View Basket", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 10),
+                      SvgPicture.asset("assets/Icons/Basket.svg", color: Colors.white),
+                      const SizedBox(width: 10),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
